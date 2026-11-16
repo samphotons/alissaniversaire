@@ -60,8 +60,8 @@
     <div class="eyebrow">Ton année est…</div>
     <div class="year" id="yearValue">2000</div>
     <p id="resultName"></p>
-    <button id="againButton" type="button">Revoir mon année</button>
     <p class="hint">Garde-la secrète jusqu'à la soirée… et prépare ton meilleur look !</p>
+    <p class="hint">Besoin d'<a href="https://www.marieclaire.com/fashion/g3536/120-years-of-style/" target="_blank" rel="noopener noreferrer" style="color:var(--orange); font-weight:700; text-decoration:underline;">inspiration</a> ?</p>
   </section>
 
   <p class="smallprint">Tirage unique · Années 1996 à 2026 · Pas de doublon</p>
@@ -115,12 +115,6 @@
 
   button.addEventListener("click", draw);
   nameInput.addEventListener("keydown", e => { if (e.key === "Enter") draw(); });
-  document.getElementById("againButton").addEventListener("click", () => {
-    resultPanel.style.display = "none";
-    formPanel.classList.remove("hidden");
-    nameInput.value = lastName;
-    nameInput.focus();
-  });
 </script>
 </body>
 </html>
