@@ -98,7 +98,7 @@
     }
     if (!window.supabase) { showError("La connexion au service de tirage n'a pas pu se charger. Réessaie dans un instant."); return; }
     button.disabled = true;
-    button.textContent = "Le sort en est jeté…";
+    button.textContent = "Calcul en cours…";
     try {
       const client = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
       const { data, error } = await client.rpc("claim_year", { p_name: name });
