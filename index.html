@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f8eeeb">
+  <title>ALISSAniversaire — Le grand tirage</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Fredoka:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root { --cream:#f8eeeb; --paper:#fffaf6; --orange:#e87513; --dark:#a9540d; --peach:#f5bd83; --ink:#663b20; }
+    * { box-sizing:border-box }
+    body { margin:0; min-height:100vh; background:var(--cream); color:var(--ink); font-family:Fredoka,system-ui,sans-serif; display:flex; justify-content:center; padding:24px 16px 48px; }
+    main { width:min(100%,560px); text-align:center; }
+    .topline { font-size:12px; font-weight:700; letter-spacing:.22em; color:var(--dark); text-transform:uppercase; margin:12px 0 8px; }
+    h1 { margin:0; font-size:clamp(42px,10vw,72px); line-height:.95; color:#fff; text-shadow:2px 3px 0 #e8a45d; letter-spacing:-.045em; }
+    .subtitle { margin:20px auto 24px; font-family:"DM Serif Display",serif; font-size:23px; color:var(--dark); }
+    .hero { position:relative; padding:25px 18px 28px; background:var(--paper); border:1px solid #f1d9cc; border-radius:28px; box-shadow:0 12px 30px #a9540d12; overflow:hidden; }
+    .hero:before,.hero:after { content:"✦"; position:absolute; color:#e9a34d; font-size:28px; opacity:.75; }
+    .hero:before { top:16px; left:18px } .hero:after { right:18px; top:25px; font-size:20px }
+    .big30 { font-size:clamp(108px,30vw,180px); line-height:.88; font-weight:700; letter-spacing:-.08em; color:var(--peach); text-shadow:7px 8px 0 #f49a36,14px 15px 0 #e87513,20px 21px 0 #bd5c0a; margin:14px 0 18px; }
+    .years { color:var(--dark); font-family:"DM Serif Display",serif; font-size:18px; }
+    .panel { margin-top:20px; background:var(--paper); border-radius:22px; padding:24px 20px; border:1px solid #f1d9cc; text-align:left; }
+    label { display:block; font-weight:600; margin-bottom:9px; }
+    input { width:100%; border:2px solid #efc8ae; border-radius:14px; padding:15px 16px; font:500 17px Fredoka,sans-serif; color:var(--ink); background:#fff; outline:none; }
+    input:focus { border-color:var(--orange); box-shadow:0 0 0 3px #e8751320; }
+    button { width:100%; border:0; border-radius:14px; padding:16px; margin-top:13px; background:var(--orange); color:white; font:700 18px Fredoka,sans-serif; cursor:pointer; box-shadow:0 5px 0 #b95b0c; }
+    button:disabled { opacity:.6; cursor:wait; }
+    .hint { font-size:13px; line-height:1.5; color:#916849; margin:12px 2px 0; }
+    .error { color:#a32d1b; font-size:14px; margin-top:12px; min-height:18px; }
+    .result { display:none; text-align:center; padding:12px 4px 4px; }
+    .result .eyebrow { font-size:13px; letter-spacing:.16em; text-transform:uppercase; font-weight:700; color:var(--dark); }
+    .result .year { font-size:clamp(76px,22vw,120px); line-height:1; color:var(--orange); font-weight:700; letter-spacing:-.06em; margin:10px 0; }
+    .result p { font-family:"DM Serif Display",serif; font-size:20px; margin:8px 0 0; }
+    .smallprint { font-size:12px; color:#a17b60; margin:22px 8px 0; line-height:1.5; }
+    .hidden { display:none !important; }
+  </style>
+</head>
+<body>
+<main>
+  <div class="topline">Samedi 12 décembre · Paris</div>
+  <h1>ALISSAnniversaire</h1>
+  <div class="subtitle">DRESS CODE : chacun son année</div>
+  <section class="hero">
+    <div class="topline">Le grand tirage</div>
+    <div class="big30">30</div>
+    <div class="years">1996 — 2026 · Good luck !</div>
+  </section>
+
+  <section class="panel" id="formPanel">
+    <label for="guestName">Entre ton prénom</label>
+    <input id="guestName" maxlength="60" autocomplete="name" placeholder="Ex. Camille" />
+    <button id="drawButton">Découvrir mon année ✨</button>
+    <div class="error" id="error" role="alert"></div>
+    <p class="hint">Chaque année ne peut être attribuée qu'une seule fois. Pas la peine de réessayer plusieurs fois...</p>
+  </section>
+
+  <section class="panel result" id="resultPanel" aria-live="polite">
+    <div class="eyebrow">Ton année est…</div>
+    <div class="year" id="yearValue">2000</div>
+    <p id="resultName"></p>
+    <button id="againButton" type="button">Revoir mon année</button>
+    <p class="hint">Garde-la secrète jusqu'à la soirée… et prépare ton meilleur look !</p>
+  </section>
+
+  <p class="smallprint">Tirage unique · Années 1996 à 2026 · Pas de doublon</p>
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+  // À compléter après avoir créé le projet Supabase (voir README).
+  const SUPABASE_URL = "https://eakxekrmneqilzwrfrbn.supabase.co/rest/v1/";
+  const SUPABASE_ANON_KEY = "sb_publishable_jiaKB_41f9FWZMj6HEoyWw_P2u21Bwo";
+
+  const button = document.getElementById("drawButton");
+  const nameInput = document.getElementById("guestName");
+  const errorBox = document.getElementById("error");
+  const formPanel = document.getElementById("formPanel");
+  const resultPanel = document.getElementById("resultPanel");
+  let lastName = "";
+
+  function showError(message) { errorBox.textContent = message; }
+  function showResult(name, year) {
+    document.getElementById("yearValue").textContent = year;
+    document.getElementById("resultName").textContent = `${name}, prépare ton outfit !`;
+    formPanel.classList.add("hidden");
+    resultPanel.style.display = "block";
+  }
+
+  async function draw() {
+    errorBox.textContent = "";
+    const name = nameInput.value.trim().replace(/\s+/g, " ");
+    if (!name) { showError("Entre ton prénom pour participer au tirage."); return; }
+    if (SUPABASE_URL.startsWith("COLLER_") || SUPABASE_ANON_KEY.startsWith("COLLER_")) {
+      showError("Le site n'est pas encore connecté à sa base de tirage. Termine la configuration indiquée dans le guide.");
+      return;
+    }
+    if (!window.supabase) { showError("La connexion au service de tirage n'a pas pu se charger. Réessaie dans un instant."); return; }
+    button.disabled = true;
+    button.textContent = "Le sort en est jeté…";
+    try {
+      const client = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+      const { data, error } = await client.rpc("claim_year", { p_name: name });
+      if (error) throw error;
+      if (!data || !data.year) throw new Error("Aucune année n'est disponible pour le moment. Contacte l'organisateur.");
+      lastName = name;
+      showResult(name, data.year);
+    } catch (e) {
+      showError(e.message || "Une erreur est survenue. Réessaie.");
+      button.disabled = false;
+      button.textContent = "Découvrir mon année ✨";
+    }
+  }
+
+  button.addEventListener("click", draw);
+  nameInput.addEventListener("keydown", e => { if (e.key === "Enter") draw(); });
+  document.getElementById("againButton").addEventListener("click", () => {
+    resultPanel.style.display = "none";
+    formPanel.classList.remove("hidden");
+    nameInput.value = lastName;
+    nameInput.focus();
+  });
+</script>
+</body>
+</html>
